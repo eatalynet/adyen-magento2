@@ -208,11 +208,16 @@ class PaymentMethods extends AbstractHelper
 
                 // add icon location in result
                 if ($this->_adyenHelper->showLogos()) {
-
-
                     $params = [];
                     // use frontend area
                     $params = array_merge(['area' => 'frontend', '_secure' => $this->_request->isSecure()], $params);
+
+                    // Fix for https://github.com/Adyen/adyen-magento2/issues/154
+                    // First check if themeModel id is null and then supply Magento/blank
+                    $this->_assetRepo->updateDesignParams($params);
+                    if(!$params['themeModel'] || $params['themeModel']->getId() == null) {
+                        $params = array_merge(['theme' => 'Magento/blank'], $params);
+                    }
 
                     $asset = $this->_assetRepo->createAsset('Adyen_Payment::images/logos/' .
                         $paymentMethodCode . '.png', $params);
